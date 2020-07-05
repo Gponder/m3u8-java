@@ -8,17 +8,14 @@ import java.io.*;
  * @create 2020/7/4 17:08
  */
 public class M3u8Main {
-
+    static String host = "";
 
     public static void main(String[] args) throws IOException {
-
         InputStream index = ClassLoader.getSystemResourceAsStream("index1.m3u8");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(index));
-        String line;
-        while ((line = reader.readLine())!=null) {
-            System.out.println(line);
-        }
-
+        M3u8 m3u8 = new M3u8(index, host);
+        m3u8.parse();
+        m3u8.downloadBodies();
+//        m3u8.downloadKey();
     }
 
 }

@@ -33,5 +33,12 @@ public class Downloader {
         return response.body().byteStream();
     }
 
+    public String getBodyString() throws IOException {
+        Response response = client.newCall(request).execute();
+        if (!response.isSuccessful() || response.body()==null){
+            throw new RuntimeException("m3u8 list下载失败");
+        }
+        return response.body().string();
+    }
 
 }

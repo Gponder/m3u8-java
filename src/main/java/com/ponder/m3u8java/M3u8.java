@@ -1,13 +1,8 @@
 package com.ponder.m3u8java;
 
-import javax.jnlp.ClipboardService;
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @auth ponder
@@ -22,6 +17,8 @@ public class M3u8 {
     private Map<String,String> headers = new HashMap<String, String>();
     private List<String> subM3u8s = new ArrayList<String>();
     private List<String> body = new ArrayList<String>();
+    private List<String> tsFiles = new ArrayList<String>();
+    private String cacheDir = "D:/ts/cache/";
 
     //headers
     //视频流信息 #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1665000,RESOLUTION=960x540
@@ -51,7 +48,7 @@ public class M3u8 {
         this.host = host;
     }
 
-    public void parse() throws IOException {
+    public M3u8 parse() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         int counter=0;
@@ -79,13 +76,78 @@ public class M3u8 {
             if (line.contains(EXT_X_KEY)){
                 headers.put(EXT_X_KEY,line);
             }
-            if (line.endsWith(".ts"))
+            if (line.endsWith(".ts")){
+                body.add(line);
+            }
             //m3u8包涵的m3u8
             if (line.endsWith(".m3u8")){
                 subM3u8s.add(line);
             }
             counter++;
         }
+        return this;
+    }
+
+    public boolean hasSubM3u8(){
+        return subM3u8s.size()!=0;
+    }
+
+    public boolean downloadBodies() throws IOException {
+        if (body.size()==0)return false;
+        if (!new File(cacheDir).exists())new File(cacheDir).mkdirs();
+        for (int i=0;i<body.size();i++){
+            String ts = body.get(i);
+            InputStream is = new Downloader(host + ts).download();
+            String name = generateFileName(ts);
+            File tsFile = new File(cacheDir + name);
+            writeToCacheFile(is,tsFile);
+            System.out.println("下载第"+i+"个"+ts);
+        }
+        return true;
+    }
+
+    private void writeToCacheFile(InputStream is, File tsFile) throws IOException {
+        FileOutputStream tsOutputStream = new FileOutputStream(tsFile);
+        byte[] buffer = new byte[1024];
+        int l;
+        while ((l = is.available()) != 0){
+            is.read(buffer);
+            tsOutputStream.write(buffer,0,l);
+        }
+        tsFiles.add(tsFile.toString());
+    }
+
+    private String generateFileName(String ts) {
+        return ts.substring(ts.lastIndexOf("/")+1,ts.lastIndexOf("."));
+    }
+
+
+    public String downloadKey() throws IOException {
+        Map<String, String> keys = parseExtKey();
+        String key = null;
+        if (keys.get("METHOD").equalsIgnoreCase("AES-128")){
+            String keyUrl = keys.get("URI");
+            key = new Downloader(host + keyUrl).getBodyString();
+        }
+        return key;
+    }
+
+    /**
+     * #EXT-X-KEY:METHOD=AES-128,URI="/key.key"
+     * @return
+     */
+    private Map<String, String> parseExtKey() {
+        Map<String,String> extKey = null;
+        String key = headers.get(EXT_X_KEY);
+        if (key!=null){
+            extKey = new HashMap<String, String>();
+            String[] values = key.split(":")[1].split(",");
+            for (String kv:values){
+                String[] kvArr = kv.split("=");
+                extKey.put(kvArr[0],kvArr[1].replace("\"",""));
+            }
+        }
+        return extKey;
     }
 
 }
