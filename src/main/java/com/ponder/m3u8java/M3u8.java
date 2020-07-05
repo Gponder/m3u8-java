@@ -48,6 +48,11 @@ public class M3u8 {
         this.host = host;
     }
 
+    /**
+     * 解析m3u8
+     * @return
+     * @throws IOException
+     */
     public M3u8 parse() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
@@ -92,18 +97,41 @@ public class M3u8 {
         return subM3u8s.size()!=0;
     }
 
+    /**
+     * 下载视频分片
+     * @return
+     * @throws IOException
+     */
     public boolean downloadBodies() throws IOException {
         if (body.size()==0)return false;
         if (!new File(cacheDir).exists())new File(cacheDir).mkdirs();
         for (int i=0;i<body.size();i++){
             String ts = body.get(i);
-            InputStream is = new Downloader(host + ts).download();
+            String bodyString = new Downloader(host + ts).getBodyString();
             String name = generateFileName(ts);
             File tsFile = new File(cacheDir + name);
-            writeToCacheFile(is,tsFile);
+            writeBodyStringToFile(bodyString,tsFile);
             System.out.println("下载第"+i+"个"+ts);
         }
         return true;
+    }
+
+    private String generateFileName(String ts) {
+        return ts.substring(ts.lastIndexOf("/")+1,ts.lastIndexOf("."));
+    }
+
+    /**
+     * 存储视频分片
+     * @param bodyString
+     * @param tsFile
+     * @throws IOException
+     */
+    private void writeBodyStringToFile(String bodyString,File tsFile) throws IOException {
+        FileOutputStream tsOutputStream = new FileOutputStream(tsFile);
+        tsOutputStream.write(bodyString.getBytes("UTF-8"));
+        tsOutputStream.flush();
+        tsOutputStream.close();
+        tsFiles.add(tsFile.toString());
     }
 
     private void writeToCacheFile(InputStream is, File tsFile) throws IOException {
@@ -117,12 +145,12 @@ public class M3u8 {
         tsFiles.add(tsFile.toString());
     }
 
-    private String generateFileName(String ts) {
-        return ts.substring(ts.lastIndexOf("/")+1,ts.lastIndexOf("."));
-    }
-
-
-    public String downloadKey() throws IOException {
+    /**
+     * 获取AES key
+     * @return
+     * @throws IOException
+     */
+    public String getKey() throws IOException {
         Map<String, String> keys = parseExtKey();
         String key = null;
         if (keys.get("METHOD").equalsIgnoreCase("AES-128")){
@@ -133,7 +161,7 @@ public class M3u8 {
     }
 
     /**
-     * #EXT-X-KEY:METHOD=AES-128,URI="/key.key"
+     * 解析AES key地址
      * @return
      */
     private Map<String, String> parseExtKey() {
