@@ -132,7 +132,7 @@ public class M3u8 {
     }
 
     private String generateFileName(String ts) {
-        return ts.substring(ts.lastIndexOf("/")+1,ts.lastIndexOf("."));
+        return ts.substring(ts.lastIndexOf("/")+1);
     }
 
     /**
