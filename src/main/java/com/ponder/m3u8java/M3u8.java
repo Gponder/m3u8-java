@@ -36,6 +36,8 @@ public class M3u8 {
     public final static String EXT_X_KEY = "#EXT-X-KEY:";
     //视频分片标志
     public final static String EXT_INF = "#EXTINF:";
+    //结束 #EXT-X-ENDLIST
+    public final static String EXT_X_ENDLIST = "#EXT-X-ENDLIST";
 
     public M3u8(String url) throws Exception {
         this(new Downloader(url).download(),new URI(url).getHost());
@@ -91,6 +93,9 @@ public class M3u8 {
                     ts.setUrl(line);
                 }
                 body.add(ts);
+            }
+            if(line.startsWith(EXT_X_ENDLIST)){
+                break;
             }
             //m3u8包涵的m3u8
             if (line.endsWith(".m3u8")){
