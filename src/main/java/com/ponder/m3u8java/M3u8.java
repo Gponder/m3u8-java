@@ -1,5 +1,7 @@
 package com.ponder.m3u8java;
 
+import sun.security.krb5.internal.crypto.Aes128;
+
 import java.io.*;
 import java.net.URI;
 import java.util.*;
@@ -19,6 +21,7 @@ public class M3u8 {
     private List<String> body = new ArrayList<String>();
     private List<String> tsFiles = new ArrayList<String>();
     private String cacheDir = "D:/ts/cache/";
+    private String aesKey;
 
     //headers
     //视频流信息 #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1665000,RESOLUTION=960x540
@@ -102,8 +105,9 @@ public class M3u8 {
      * @return
      * @throws IOException
      */
-    public boolean downloadBodies() throws IOException {
+    public boolean downloadBodies() throws Exception {
         if (body.size()==0)return false;
+        getKey();
         if (!new File(cacheDir).exists())new File(cacheDir).mkdirs();
         for (int i=0;i<body.size();i++){
             String ts = body.get(i);
@@ -126,7 +130,12 @@ public class M3u8 {
      * @param tsFile
      * @throws IOException
      */
-    private void writeBodyStringToFile(String bodyString,File tsFile) throws IOException {
+    private void writeBodyStringToFile(String bodyString,File tsFile) throws Exception {
+        if (aesKey!=null) {
+            bodyString = AesUtil.decrypt(bodyString, aesKey);
+//            byte[] tsBytes = bodyString.getBytes();
+//            Aes128.decrypt(tsBytes,0,)
+        }
         FileOutputStream tsOutputStream = new FileOutputStream(tsFile);
         tsOutputStream.write(bodyString.getBytes("UTF-8"));
         tsOutputStream.flush();
@@ -152,12 +161,11 @@ public class M3u8 {
      */
     public String getKey() throws IOException {
         Map<String, String> keys = parseExtKey();
-        String key = null;
         if (keys.get("METHOD").equalsIgnoreCase("AES-128")){
             String keyUrl = keys.get("URI");
-            key = new Downloader(host + keyUrl).getBodyString();
+            aesKey = new Downloader(host + keyUrl).getBodyString();
         }
-        return key;
+        return aesKey;
     }
 
     /**
