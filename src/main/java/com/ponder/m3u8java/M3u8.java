@@ -16,7 +16,7 @@ public class M3u8 {
     private InputStream inputStream;
     private Map<String,String> headers = new HashMap<String, String>();
     private List<String> subM3u8s = new ArrayList<String>();
-    private List<String> body = new ArrayList<String>();
+    private List<TS> body = new ArrayList<TS>();
     private List<String> tsFiles = new ArrayList<String>();
     private String cacheDir = "D:/ts/cache/";
 
@@ -34,6 +34,8 @@ public class M3u8 {
     //解码NONE 或者 AES-128。如果是NONE，则URI以及IV属性必须不存在，如果是AES-128(Advanced Encryption Standard)，则URI必须存在，IV可以不存在。
     //#EXT-X-KEY:METHOD=AES-128,URI="/key.key"
     public final static String EXT_X_KEY = "#EXT-X-KEY:";
+    //视频分片标志
+    public final static String EXT_INF = "#EXTINF:";
 
     public M3u8(String url) throws Exception {
         this(new Downloader(url).download(),new URI(url).getHost());
@@ -81,8 +83,14 @@ public class M3u8 {
             if (line.contains(EXT_X_KEY)){
                 headers.put(EXT_X_KEY,line);
             }
-            if (line.endsWith(".ts")){
-                body.add(line);
+            if (line.startsWith(EXT_INF)){
+                TS ts = new TS();
+                ts.setDuration(Float.parseFloat(line.substring(EXT_INF.length(),line.indexOf(","))));
+                line = reader.readLine();
+                if (line.endsWith(".ts")){
+                    ts.setUrl(line);
+                }
+                body.add(ts);
             }
             //m3u8包涵的m3u8
             if (line.endsWith(".m3u8")){
@@ -106,11 +114,13 @@ public class M3u8 {
         if (body.size()==0)return false;
         if (!new File(cacheDir).exists())new File(cacheDir).mkdirs();
         for (int i=0;i<body.size();i++){
-            String ts = body.get(i);
+            TS tsObj = body.get(i);
+            String ts = tsObj.getUrl();
             String bodyString = new Downloader(host + ts).getBodyString();
             String name = generateFileName(ts);
             File tsFile = new File(cacheDir + name);
             writeBodyStringToFile(bodyString,tsFile);
+            tsObj.setTsFile(tsFile.toString());
             System.out.println("下载第"+i+"个"+ts);
         }
         return true;
@@ -131,7 +141,6 @@ public class M3u8 {
         tsOutputStream.write(bodyString.getBytes("UTF-8"));
         tsOutputStream.flush();
         tsOutputStream.close();
-        tsFiles.add(tsFile.toString());
     }
 
     private void writeToCacheFile(InputStream is, File tsFile) throws IOException {
@@ -176,6 +185,36 @@ public class M3u8 {
             }
         }
         return extKey;
+    }
+
+    class TS{
+        private float duration;
+        private String url;
+        private String tsFile;
+
+        public float getDuration() {
+            return duration;
+        }
+
+        public void setDuration(float duration) {
+            this.duration = duration;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getTsFile() {
+            return tsFile;
+        }
+
+        public void setTsFile(String tsFile) {
+            this.tsFile = tsFile;
+        }
     }
 
 }
