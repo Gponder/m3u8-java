@@ -121,10 +121,10 @@ public class M3u8 {
         for (int i=0;i<body.size();i++){
             TS tsObj = body.get(i);
             String ts = tsObj.getUrl();
-            String bodyString = new Downloader(host + ts).getBodyString();
+            byte[] bodyBytes = new Downloader(host + ts).getBodyBytes();
             String name = generateFileName(ts);
             File tsFile = new File(cacheDir + name);
-            writeBodyStringToFile(bodyString,tsFile);
+            writeBodyBytesToFile(bodyBytes,tsFile);
             tsObj.setTsFile(tsFile.toString());
             System.out.println("下载第"+i+"个"+ts);
         }
@@ -137,6 +137,19 @@ public class M3u8 {
 
     /**
      * 存储视频分片
+     * @param bodyBytes
+     * @param tsFile
+     * @throws IOException
+     */
+    private void writeBodyBytesToFile(byte[] bodyBytes,File tsFile) throws IOException {
+        FileOutputStream tsOutputStream = new FileOutputStream(tsFile);
+        tsOutputStream.write(bodyBytes);
+        tsOutputStream.flush();
+        tsOutputStream.close();
+    }
+
+    /**
+     * 因为java utf-8 解码 编码 非码区数据无法还原所以不能通过字符串编码还原数据
      * @param bodyString
      * @param tsFile
      * @throws IOException
@@ -148,7 +161,7 @@ public class M3u8 {
         tsOutputStream.close();
     }
 
-    private void writeToCacheFile(InputStream is, File tsFile) throws IOException {
+    private void writeStreamToFile(InputStream is, File tsFile) throws IOException {
         FileOutputStream tsOutputStream = new FileOutputStream(tsFile);
         byte[] buffer = new byte[1024];
         int l;
