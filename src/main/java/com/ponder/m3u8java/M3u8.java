@@ -128,6 +128,7 @@ public class M3u8 {
             tsObj.setTsFile(tsFile.toString());
             System.out.println("下载第"+i+"个"+ts);
         }
+        tsDownloadComplete.onComplete(body);
         return true;
     }
 
@@ -233,6 +234,27 @@ public class M3u8 {
         public void setTsFile(String tsFile) {
             this.tsFile = tsFile;
         }
+    }
+
+    TsDownloadComplete tsDownloadComplete = new TsDownloadComplete() {
+        @Override
+        public void onComplete(List<TS> tsList) throws IOException {
+            FileOutputStream fos = new FileOutputStream(cacheDir + System.currentTimeMillis());
+            for (TS ts:tsList){
+                FileInputStream fis = new FileInputStream(ts.getTsFile());
+                byte[] buffer = new byte[fis.available()];
+                fis.read(buffer);
+                fis.close();
+                fis=null;
+                fos.write(buffer);
+            }
+            fos.flush();
+            fos.close();
+        }
+    };
+
+    interface TsDownloadComplete{
+        void onComplete(List<TS> tsList) throws IOException;
     }
 
 }
