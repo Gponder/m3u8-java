@@ -1,7 +1,6 @@
 package com.ponder.m3u8java;
 
 import java.io.*;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,14 +13,16 @@ import java.util.Map;
  */
 public class M3u8 {
 
-    private String url;
     private String host;
+    private String path;
+    private String name;
     private InputStream inputStream;
     private Map<String,String> headers = new HashMap<String, String>();
     private List<String> subM3u8s = new ArrayList<String>();
     private List<TS> body = new ArrayList<TS>();
     private List<String> tsFiles = new ArrayList<String>();
-    private String cacheDir = "D:/ts/cache/";
+    private final String baseDir = "D:/ts/";
+    private final String cacheDir = baseDir+"cache/";
     private String aesKey;
 
     //headers
@@ -44,16 +45,43 @@ public class M3u8 {
     public final static String EXT_X_ENDLIST = "#EXT-X-ENDLIST";
 
     public M3u8(String url) throws Exception {
-        this(new Downloader(url).download(),new URI(url).getHost());
+        this.host = url.substring(0,url.lastIndexOf("/")+1);
+        this.path = url.substring(url.lastIndexOf("/")+1);
+        this.name = path.replace(".m3u8","");
+        this.inputStream = new Downloader(url).download();
+        init();
     }
 
-    public M3u8(String file,String host) throws FileNotFoundException {
-        this(new FileInputStream(file),host);
+    public M3u8(String host,String path) throws IOException {
+        this.host = host;
+        this.path = path;
+        this.name = path.replace(".m3u8","");
+        this.inputStream = new Downloader(host+path).download();
+        init();
+    }
+
+    public M3u8(File file,String host) throws FileNotFoundException {
+        this.host = host;
+        this.path = file.getPath().substring(file.getPath().lastIndexOf("/"));
+        this.name = path.replace(".m3u8","");
+        this.inputStream = new FileInputStream(file);
+        init();
     }
 
     public M3u8(InputStream inputStream,String host) {
-        this.inputStream = inputStream;
         this.host = host;
+        this.name = String.valueOf(System.currentTimeMillis());
+        this.inputStream = inputStream;
+        init();
+    }
+
+    private void init() {
+        try {
+            parse();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("解析m3u8失败");
+        }
     }
 
     /**
@@ -114,59 +142,51 @@ public class M3u8 {
         return subM3u8s.size()!=0;
     }
 
+    public void download() throws IOException {
+        if (hasSubM3u8()){
+            downloadSubM3u8().download();
+        }else{
+            downloadBodiesWithPool();
+        }
+    }
+
+    public M3u8 downloadSubM3u8() throws IOException {
+        String url = subM3u8s.get(0);
+        String subHost = host+url.substring(0,url.lastIndexOf("/")+1);
+        String subPath = url.substring(url.lastIndexOf("/") + 1);
+        return new M3u8(subHost,subPath);
+    }
+
     /**
      * 下载视频分片
      * @return
      * @throws IOException
      */
-    public boolean downloadBodies() throws Exception {
+    public boolean downloadBodies() throws IOException {
         if (body.size()==0)return false;
-        getKey();
-        if (!new File(cacheDir).exists())new File(cacheDir).mkdirs();
         for (int i=0;i<body.size();i++){
             TS tsObj = body.get(i);
             String ts = tsObj.getUrl();
-            String bodyString = new Downloader(host + ts).getBodyString();
-            String name = generateFileName(ts);
-            File tsFile = new File(cacheDir + name);
-            writeBodyStringToFile(bodyString,tsFile);
+            byte[] bodyBytes = new Downloader(host + ts).getBodyBytes();
+            File tsFile = new File(cacheDir +name+"/"+ts.substring(ts.lastIndexOf("/")+1));
+            FileUtil.writeBodyBytesToFile(bodyBytes,tsFile);
             tsObj.setTsFile(tsFile.toString());
             System.out.println("下载第"+i+"个"+ts);
         }
+        downloadComplete.onComplete(body);
         return true;
     }
 
-    private String generateFileName(String ts) {
-        return ts.substring(ts.lastIndexOf("/")+1);
-    }
-
     /**
-     * 存储视频分片
-     * @param bodyString
-     * @param tsFile
+     * 下载视频分片
+     * @return
      * @throws IOException
      */
-    private void writeBodyStringToFile(String bodyString,File tsFile) throws Exception {
-        if (aesKey!=null) {
-            bodyString = AesUtil.decrypt(bodyString, aesKey);
-//            byte[] tsBytes = bodyString.getBytes();
-//            Aes128.decrypt(tsBytes,0,)
+    public void downloadBodiesWithPool() throws IOException {
+        if (body.size()==0)return;
+        for (int i=0;i<body.size();i++){
+            new DownLoadRunnable(body.get(i), this, tsDownloadComplete).download();
         }
-        FileOutputStream tsOutputStream = new FileOutputStream(tsFile);
-        tsOutputStream.write(bodyString.getBytes("UTF-8"));
-        tsOutputStream.flush();
-        tsOutputStream.close();
-    }
-
-    private void writeToCacheFile(InputStream is, File tsFile) throws IOException {
-        FileOutputStream tsOutputStream = new FileOutputStream(tsFile);
-        byte[] buffer = new byte[1024];
-        int l;
-        while ((l = is.available()) != 0){
-            is.read(buffer);
-            tsOutputStream.write(buffer,0,l);
-        }
-        tsFiles.add(tsFile.toString());
     }
 
     /**
@@ -201,10 +221,19 @@ public class M3u8 {
         return extKey;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public String getTsCacheFolder() {
+        return cacheDir+name+"/";
+    }
+
     class TS{
         private float duration;
         private String url;
         private String tsFile;
+        private boolean downloaded;
 
         public float getDuration() {
             return duration;
@@ -229,6 +258,46 @@ public class M3u8 {
         public void setTsFile(String tsFile) {
             this.tsFile = tsFile;
         }
+
+        public boolean isDownloaded() {
+            return downloaded;
+        }
+
+        public void setDownloaded(boolean downloaded) {
+            this.downloaded = downloaded;
+        }
+    }
+
+    DownLoadRunnable.TsDownloadComplete tsDownloadComplete = new DownLoadRunnable.TsDownloadComplete() {
+        @Override
+        public void onTsDownloaded(TS ts) throws IOException {
+            boolean isAllDownload=true;
+            for (TS t:body){
+                if (!t.isDownloaded())isAllDownload=false;
+            }
+            if (isAllDownload)downloadComplete.onComplete(body);
+        }
+    };
+
+    DownloadComplete downloadComplete = new DownloadComplete() {
+        @Override
+        public void onComplete(List<TS> tsList) throws IOException {
+            FileOutputStream fos = new FileOutputStream(baseDir + name);
+            for (TS ts:tsList){
+                FileInputStream fis = new FileInputStream(ts.getTsFile());
+                byte[] buffer = new byte[fis.available()];
+                fis.read(buffer);
+                fis.close();
+                fos.write(buffer);
+            }
+            fos.flush();
+            fos.close();
+            System.out.println("合并完成");
+        }
+    };
+
+    interface DownloadComplete {
+        void onComplete(List<TS> tsList) throws IOException;
     }
 
 }
