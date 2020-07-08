@@ -163,12 +163,11 @@ public class M3u8 {
      */
     public boolean downloadBodies() throws IOException {
         if (body.size()==0)return false;
-        if (!new File(cacheDir).exists())new File(cacheDir).mkdirs();
         for (int i=0;i<body.size();i++){
             TS tsObj = body.get(i);
             String ts = tsObj.getUrl();
             byte[] bodyBytes = new Downloader(host + ts).getBodyBytes();
-            File tsFile = new File(cacheDir +name+ ts.substring(ts.lastIndexOf("/")));
+            File tsFile = new File(cacheDir +name+"/"+ts.substring(ts.lastIndexOf("/")+1));
             writeBodyBytesToFile(bodyBytes,tsFile);
             tsObj.setTsFile(tsFile.toString());
             System.out.println("下载第"+i+"个"+ts);
@@ -184,6 +183,8 @@ public class M3u8 {
      * @throws IOException
      */
     private void writeBodyBytesToFile(byte[] bodyBytes,File tsFile) throws IOException {
+        File tsParentFile = new File(tsFile.getParent());
+        if (!tsParentFile.exists())tsParentFile.mkdirs();
         FileOutputStream tsOutputStream = new FileOutputStream(tsFile);
         tsOutputStream.write(bodyBytes);
         tsOutputStream.flush();
