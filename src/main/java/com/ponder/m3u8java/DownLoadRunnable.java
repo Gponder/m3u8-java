@@ -8,11 +8,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class DownLoadRunnable implements Runnable {
 
     public static final ExecutorService executorService = Executors.newFixedThreadPool(4);
-    private static OkHttpClient client = new OkHttpClient();
+    private static OkHttpClient client;
 
     private M3u8.TS ts;
     private M3u8 m3u8;
@@ -22,6 +23,11 @@ public class DownLoadRunnable implements Runnable {
         this.ts = ts;
         this.m3u8 = m3u8;
         this.tsDownloadComplete = tsDownloadComplete;
+        client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
     }
 
     public void download(){
@@ -38,7 +44,7 @@ public class DownLoadRunnable implements Runnable {
             FileUtil.writeBodyBytesToFile(bodyBytes,tsFile);
             ts.setTsFile(tsFile.toString());
             ts.setDownloaded(true);
-            System.out.println("下载完成"+ts.getUrl());
+            System.out.println(Thread.currentThread().getId()+"下载完成"+ts.getUrl());
             tsDownloadComplete.onTsDownloaded(ts);
         } catch (IOException e) {
             e.printStackTrace();

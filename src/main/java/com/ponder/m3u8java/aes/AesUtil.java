@@ -1,4 +1,4 @@
-package com.ponder.m3u8java;
+package com.ponder.m3u8java.aes;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;

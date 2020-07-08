@@ -1,9 +1,6 @@
 package com.ponder.m3u8java;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 public class FileUtil {
 
@@ -43,6 +40,33 @@ public class FileUtil {
             is.read(buffer);
             tsOutputStream.write(buffer,0,l);
         }
+    }
+
+    /**
+     * 读取文件
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public byte[] readFile(String file) throws IOException {
+        FileInputStream fis = new FileInputStream(file);
+        byte[] buffer = new byte[fis.available()];
+        fis.read(buffer);
+        fis.close();
+        return buffer;
+    }
+
+    /**
+     * byte数组写入到文件
+     * @param bytes
+     * @param file
+     * @throws IOException
+     */
+    public void writeFile(byte[] bytes,String file) throws IOException {
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(bytes);
+        fos.flush();
+        fos.close();
     }
 
 }

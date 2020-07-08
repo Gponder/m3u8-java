@@ -1,4 +1,4 @@
-package com.ponder.m3u8java;
+package com.ponder.m3u8java.aes;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
