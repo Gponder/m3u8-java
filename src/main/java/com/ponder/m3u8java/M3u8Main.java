@@ -13,7 +13,7 @@ public class M3u8Main {
     public static void main(String[] args) throws Exception {
         InputStream index = ClassLoader.getSystemResourceAsStream("test.m3u8");
         M3u8 m3u8 = new M3u8(index, host);
-        m3u8.downloadBodies();
+        m3u8.download();
     }
 
 }
