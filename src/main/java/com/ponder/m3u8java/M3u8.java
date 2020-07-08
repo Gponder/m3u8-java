@@ -1,8 +1,10 @@
 package com.ponder.m3u8java;
 
 import java.io.*;
-import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @auth ponder
@@ -11,14 +13,16 @@ import java.util.*;
  */
 public class M3u8 {
 
-    private String url;
     private String host;
+    private String path;
+    private String name;
     private InputStream inputStream;
     private Map<String,String> headers = new HashMap<String, String>();
     private List<String> subM3u8s = new ArrayList<String>();
     private List<TS> body = new ArrayList<TS>();
     private List<String> tsFiles = new ArrayList<String>();
-    private String cacheDir = "D:/ts/cache/";
+    private final String baseDir = "D:/ts/";
+    private final String cacheDir = baseDir+"cache/";
 
     //headers
     //视频流信息 #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1665000,RESOLUTION=960x540
@@ -40,16 +44,43 @@ public class M3u8 {
     public final static String EXT_X_ENDLIST = "#EXT-X-ENDLIST";
 
     public M3u8(String url) throws Exception {
-        this(new Downloader(url).download(),new URI(url).getHost());
+        this.host = url.substring(0,url.lastIndexOf("/")+1);
+        this.path = url.substring(url.lastIndexOf("/")+1);
+        this.name = path.replace(".m3u8","");
+        this.inputStream = new Downloader(url).download();
+        init();
     }
 
-    public M3u8(String file,String host) throws FileNotFoundException {
-        this(new FileInputStream(file),host);
+    public M3u8(String host,String path) throws IOException {
+        this.host = host;
+        this.path = path;
+        this.name = path.replace(".m3u8","");
+        this.inputStream = new Downloader(host+path).download();
+        init();
+    }
+
+    public M3u8(File file,String host) throws FileNotFoundException {
+        this.host = host;
+        this.path = file.getPath().substring(file.getPath().lastIndexOf("/"));
+        this.name = path.replace(".m3u8","");
+        this.inputStream = new FileInputStream(file);
+        init();
     }
 
     public M3u8(InputStream inputStream,String host) {
-        this.inputStream = inputStream;
         this.host = host;
+        this.name = String.valueOf(System.currentTimeMillis());
+        this.inputStream = inputStream;
+        init();
+    }
+
+    private void init() {
+        try {
+            parse();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("解析m3u8失败");
+        }
     }
 
     /**
@@ -110,6 +141,21 @@ public class M3u8 {
         return subM3u8s.size()!=0;
     }
 
+    public void download() throws IOException {
+        if (hasSubM3u8()){
+            downloadSubM3u8().download();
+        }else{
+            downloadBodies();
+        }
+    }
+
+    public M3u8 downloadSubM3u8() throws IOException {
+        String url = subM3u8s.get(0);
+        String subHost = host+url.substring(0,url.lastIndexOf("/")+1);
+        String subPath = url.substring(url.lastIndexOf("/") + 1);
+        return new M3u8(subHost,subPath);
+    }
+
     /**
      * 下载视频分片
      * @return
@@ -122,18 +168,13 @@ public class M3u8 {
             TS tsObj = body.get(i);
             String ts = tsObj.getUrl();
             byte[] bodyBytes = new Downloader(host + ts).getBodyBytes();
-            String name = generateFileName(ts);
-            File tsFile = new File(cacheDir + name);
+            File tsFile = new File(cacheDir +name+ ts.substring(ts.lastIndexOf("/")));
             writeBodyBytesToFile(bodyBytes,tsFile);
             tsObj.setTsFile(tsFile.toString());
             System.out.println("下载第"+i+"个"+ts);
         }
         tsDownloadComplete.onComplete(body);
         return true;
-    }
-
-    private String generateFileName(String ts) {
-        return ts.substring(ts.lastIndexOf("/")+1);
     }
 
     /**
@@ -239,13 +280,12 @@ public class M3u8 {
     TsDownloadComplete tsDownloadComplete = new TsDownloadComplete() {
         @Override
         public void onComplete(List<TS> tsList) throws IOException {
-            FileOutputStream fos = new FileOutputStream(cacheDir + System.currentTimeMillis());
+            FileOutputStream fos = new FileOutputStream(baseDir + name);
             for (TS ts:tsList){
                 FileInputStream fis = new FileInputStream(ts.getTsFile());
                 byte[] buffer = new byte[fis.available()];
                 fis.read(buffer);
                 fis.close();
-                fis=null;
                 fos.write(buffer);
             }
             fos.flush();
