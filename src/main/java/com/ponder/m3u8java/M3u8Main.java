@@ -1,7 +1,6 @@
 package com.ponder.m3u8java;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @auth ponder
