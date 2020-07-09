@@ -1,5 +1,8 @@
 package com.ponder.m3u8java;
 
+import com.ponder.m3u8java.base.M3u8;
+import com.ponder.m3u8java.downloader.DownloadFactory;
+
 import java.io.InputStream;
 
 /**
@@ -21,7 +24,8 @@ public class M3u8Main {
         Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-
+                e.printStackTrace();
+                DownloadFactory.closeThreadPool();
             }
         });
     }

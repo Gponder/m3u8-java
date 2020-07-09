@@ -1,7 +1,7 @@
 package com.ponder.m3u8java.downloader;
 
 import com.ponder.m3u8java.util.FileUtil;
-import com.ponder.m3u8java.M3u8;
+import com.ponder.m3u8java.base.M3u8;
 import com.ponder.m3u8java.util.Log;
 
 import java.io.File;
@@ -56,6 +56,10 @@ public abstract class Downloader{
 
     public interface TsDownloadCallback{
         void onTsDownloaded(M3u8.TS ts) throws IOException;
+    }
+
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 
 }

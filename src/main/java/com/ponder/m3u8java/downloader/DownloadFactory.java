@@ -18,6 +18,10 @@ public class DownloadFactory {
         return downloader;
     }
 
+    public static void closeThreadPool(){
+        if (downloader!=null) downloader.getExecutorService().shutdownNow();
+    }
+
     public enum Type{
         OK_HTTP(1),HTTP_CLIENT(2),URL_CONNECTION(3);
         private final int type;
