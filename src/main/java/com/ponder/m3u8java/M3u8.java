@@ -1,5 +1,8 @@
 package com.ponder.m3u8java;
 
+import com.ponder.m3u8java.downloader.okhttp.DownLoadRunnable;
+import com.ponder.m3u8java.downloader.okhttp.Downloader;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -229,7 +232,7 @@ public class M3u8 {
         return cacheDir+name+"/";
     }
 
-    class TS{
+    public class TS{
         private float duration;
         private String url;
         private String tsFile;

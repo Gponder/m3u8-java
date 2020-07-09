@@ -1,4 +1,4 @@
-package com.ponder.m3u8java;
+package com.ponder.m3u8java.downloader.okhttp;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

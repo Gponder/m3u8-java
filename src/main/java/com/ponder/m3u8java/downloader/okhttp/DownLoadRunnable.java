@@ -1,5 +1,7 @@
-package com.ponder.m3u8java;
+package com.ponder.m3u8java.downloader.okhttp;
 
+import com.ponder.m3u8java.FileUtil;
+import com.ponder.m3u8java.M3u8;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -60,7 +62,7 @@ public class DownLoadRunnable implements Runnable {
         return response.body().bytes();
     }
 
-    interface TsDownloadComplete{
+    public interface TsDownloadComplete{
         void onTsDownloaded(M3u8.TS ts) throws IOException;
     }
 
