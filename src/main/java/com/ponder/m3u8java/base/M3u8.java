@@ -7,6 +7,7 @@ import com.ponder.m3u8java.util.FileUtil;
 import com.ponder.m3u8java.util.Log;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +33,9 @@ public class M3u8 {
     private Downloader downloader = DownloadFactory.getDownloader(DownloadFactory.Type.URL_CONNECTION);
 
     public M3u8(String url) throws IOException {
-        this.host = url.substring(0,url.lastIndexOf("/")+1);
-        this.path = url.substring(url.lastIndexOf("/")+1);
+        String h = new URL(url).getHost();
+        this.host = url.substring(0,url.indexOf(h)+h.length());
+        this.path = url.replace(host,"");
         this.name = path.replace(".m3u8","");
         this.inputStream = downloader.getStream(url);
         init();
@@ -90,8 +92,8 @@ public class M3u8 {
 
     public M3u8 downloadSubM3u8() throws IOException {
         String url = subM3u8s.get(0);
-        String subHost = host+url.substring(0,url.lastIndexOf("/")+1);
-        String subPath = url.substring(url.lastIndexOf("/") + 1);
+        String subHost = host;
+        String subPath = url;
         return new M3u8(subHost,subPath);
     }
 
@@ -211,12 +213,12 @@ public class M3u8 {
         @Override
         public void onComplete(List<TS> tsList) throws IOException {
             getKey();
-            FileOutputStream fos = new FileOutputStream(baseDir + name);
+            File writeFile = new File(baseDir + name);
+            File parent = new File(writeFile.getParent());
+            if (!parent.exists())parent.mkdirs();
+            FileOutputStream fos = new FileOutputStream(writeFile);
             for (TS ts:tsList){
-                FileInputStream fis = new FileInputStream(ts.getTsFile());
-                byte[] buffer = new byte[fis.available()];
-                fis.read(buffer);
-                fis.close();
+                byte[] buffer = FileUtil.readBytesFromFile(ts.getTsFile());
                 if (aesKey!=null){
                     try {
                         buffer = AesUtil.decrypt(buffer,aesKey);
