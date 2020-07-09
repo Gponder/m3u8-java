@@ -20,6 +20,20 @@ public class FileUtil {
     }
 
     /**
+     * 读取文件到byte数组
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static byte[] readBytesFromFile(String file) throws IOException {
+        FileInputStream fis = new FileInputStream(file);
+        byte[] buffer = new byte[fis.available()];
+        fis.read(buffer);
+        fis.close();
+        return buffer;
+    }
+
+    /**
      * 因为java utf-8 解码 编码 非码区数据无法还原所以不能通过字符串编码还原数据
      * @param bodyString
      * @param tsFile
