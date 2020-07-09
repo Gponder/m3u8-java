@@ -1,9 +1,8 @@
 package com.ponder.m3u8java.downloader;
 
-import com.ponder.m3u8java.FileUtil;
+import com.ponder.m3u8java.util.FileUtil;
 import com.ponder.m3u8java.M3u8;
 import com.ponder.m3u8java.util.Log;
-import org.apache.http.MethodNotSupportedException;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.ponder.m3u8java;
+package com.ponder.m3u8java.util;
 
 import java.io.*;
 

@@ -2,6 +2,7 @@ package com.ponder.m3u8java;
 
 import com.ponder.m3u8java.downloader.DownloadFactory;
 import com.ponder.m3u8java.downloader.Downloader;
+import com.ponder.m3u8java.util.FileUtil;
 import com.ponder.m3u8java.util.Log;
 
 import java.io.*;
