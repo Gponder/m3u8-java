@@ -1,8 +1,6 @@
 package com.ponder.m3u8java;
 
-import com.ponder.m3u8java.downloader.okhttp.DownLoadRunnable;
-
-import java.io.*;
+import java.io.InputStream;
 
 /**
  * @auth ponder
@@ -23,7 +21,7 @@ public class M3u8Main {
         Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                DownLoadRunnable.executorService.shutdown();
+
             }
         });
     }
