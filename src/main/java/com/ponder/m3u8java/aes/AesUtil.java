@@ -89,18 +89,14 @@ public class AesUtil {
      * @throws Exception
      */
     public static byte[] decrypt(byte[] content, String key) throws Exception {
-        try {
-            byte[] raw = key.getBytes("utf8");
-            SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            IvParameterSpec iv = new IvParameterSpec(ivParameter.getBytes());
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
-            byte[] original = cipher.doFinal(content);
+        byte[] raw = key.getBytes("utf8");
+        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        IvParameterSpec iv = new IvParameterSpec(ivParameter.getBytes());
+        cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+        byte[] original = cipher.doFinal(content);
 
-            return original;
-        } catch (Exception ex) {
-            return null;
-        }
+        return original;
     }
 
 

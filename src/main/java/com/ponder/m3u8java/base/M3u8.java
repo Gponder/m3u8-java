@@ -1,5 +1,6 @@
 package com.ponder.m3u8java.base;
 
+import com.ponder.m3u8java.aes.AesUtil;
 import com.ponder.m3u8java.downloader.DownloadFactory;
 import com.ponder.m3u8java.downloader.Downloader;
 import com.ponder.m3u8java.util.FileUtil;
@@ -209,12 +210,21 @@ public class M3u8 {
     DownloadCallback downloadCallback = new DownloadCallback() {
         @Override
         public void onComplete(List<TS> tsList) throws IOException {
+            getKey();
             FileOutputStream fos = new FileOutputStream(baseDir + name);
             for (TS ts:tsList){
                 FileInputStream fis = new FileInputStream(ts.getTsFile());
                 byte[] buffer = new byte[fis.available()];
                 fis.read(buffer);
                 fis.close();
+                if (aesKey!=null){
+                    try {
+                        buffer = AesUtil.decrypt(buffer,aesKey);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        Log.log("aes解密失败");
+                    }
+                }
                 fos.write(buffer);
             }
             fos.flush();
