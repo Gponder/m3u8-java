@@ -64,7 +64,7 @@ public abstract class Downloader{
             try {
                 bodyBytes = getBytes(ts.getHost() + tsUrl);
             } catch (IOException e) {
-                Log.log("SocketException; I will retry for it");
+                Log.log(ts.getSerial() + "SocketException; I will retry for it" + e.getCause());
                 return false;
             }
             return true;
