@@ -1,7 +1,6 @@
 package com.ponder.m3u8java.util;
 
 import java.io.*;
-import java.lang.reflect.Field;
 
 public class FileUtil {
 
@@ -64,6 +63,8 @@ public class FileUtil {
     }
 
     public static String writeStreamToFile(InputStream is, File file) throws IOException {
+        File parent = new File(file.getParent());
+        if (!parent.exists())parent.mkdirs();
         FileOutputStream fos = new FileOutputStream(file);
         byte[] buffer = new byte[1024];
         int len;
