@@ -42,11 +42,11 @@ public abstract class Downloader{
             try {
                 String tsUrl = ts.getUrl();
                 byte[] bodyBytes = getBytes(ts.getHost() + tsUrl);
-                File tsFile = new File(ts.getCacheFolder()+tsUrl.substring(tsUrl.lastIndexOf("/")+1));
+                File tsFile = new File(ts.getCacheFile());
                 FileUtil.writeBodyBytesToFile(bodyBytes,tsFile);
                 ts.setTsFile(tsFile.toString());
                 ts.setDownloaded(true);
-                Log.log(Thread.currentThread().getId() + "下载完成" + ts.getUrl());
+                Log.log(Thread.currentThread().getId() + "下载完成" + ts.getTsFile());
                 callback.onTsDownloaded(ts);
             } catch (IOException e) {
                 e.printStackTrace();

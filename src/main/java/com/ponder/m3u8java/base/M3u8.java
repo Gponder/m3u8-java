@@ -36,7 +36,7 @@ public class M3u8 {
         String h = new URL(url).getHost();
         this.host = url.substring(0,url.indexOf(h)+h.length());
         this.path = url.replace(host,"");
-        this.name = path.replace(".m3u8","");
+        this.name = path.replace(".m3u8","").replace("/","");
         this.inputStream = downloader.getStream(url);
         init();
     }
@@ -44,7 +44,7 @@ public class M3u8 {
     public M3u8(String host,String path) throws IOException {
         this.host = host;
         this.path = path;
-        this.name = path.replace(".m3u8","");
+        this.name = path.replace(".m3u8","").replace("/","");
         this.inputStream = downloader.getStream(host+path);
         init();
     }
@@ -52,7 +52,7 @@ public class M3u8 {
     public M3u8(File file,String host) throws FileNotFoundException {
         this.host = host;
         this.path = file.getPath().substring(file.getPath().lastIndexOf("/"));
-        this.name = path.replace(".m3u8","");
+        this.name = path.replace(".m3u8","").replace("/","");
         this.inputStream = new FileInputStream(file);
         init();
     }
@@ -75,7 +75,7 @@ public class M3u8 {
     }
 
     public void addTS(float duration, String url){
-        body.add(new TS(duration,url));
+        body.add(new TS(duration,url,body.size()));
     }
 
     public boolean hasSubM3u8(){
@@ -107,7 +107,7 @@ public class M3u8 {
             TS tsObj = body.get(i);
             String ts = tsObj.getUrl();
             byte[] bodyBytes = downloader.getBytes(host + ts);
-            File tsFile = new File(cacheDir +name+"/"+ts.substring(ts.lastIndexOf("/")+1));
+            File tsFile = new File(tsObj.getCacheFile());
             FileUtil.writeBodyBytesToFile(bodyBytes,tsFile);
             tsObj.setTsFile(tsFile.toString());
             Log.log("下载第"+i+"个"+ts);
@@ -146,14 +146,16 @@ public class M3u8 {
 
 
     public class TS{
+        private int serial;
         private float duration;
         private String url;
         private String tsFile;
         private boolean downloaded;
 
-        public TS(float duration, String url) {
+        public TS(float duration, String url,Integer serial) {
             this.duration = duration;
             this.url = url;
+            this.serial = serial;
         }
 
         public String getHost(){
@@ -162,6 +164,18 @@ public class M3u8 {
 
         public String getCacheFolder(){
             return cacheDir+name+"/";
+        }
+
+        public String getCacheFile(){
+            return getCacheFolder()+getSerial()+"-"+url.substring(url.lastIndexOf("/")+1);
+        }
+
+        public int getSerial() {
+            return serial;
+        }
+
+        public void setSerial(int serial) {
+            this.serial = serial;
         }
 
         public float getDuration() {
