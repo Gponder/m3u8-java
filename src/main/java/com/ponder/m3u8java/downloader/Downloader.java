@@ -1,5 +1,6 @@
 package com.ponder.m3u8java.downloader;
 
+import com.ponder.m3u8java.aes.AesUtil;
 import com.ponder.m3u8java.util.FileUtil;
 import com.ponder.m3u8java.base.M3u8;
 import com.ponder.m3u8java.util.Log;
@@ -42,6 +43,14 @@ public abstract class Downloader{
             try {
                 String tsUrl = ts.getUrl();
                 byte[] bodyBytes = getBytes(ts.getHost() + tsUrl);
+                if (ts.getAesKey()!=null){
+                    try {
+                        bodyBytes = AesUtil.decrypt(bodyBytes,ts.getAesKey());
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        Log.log("aes解密失败");
+                    }
+                }
                 File tsFile = new File(ts.getCacheFile());
                 FileUtil.writeBodyBytesToFile(bodyBytes,tsFile);
                 ts.setTsFile(tsFile.toString());

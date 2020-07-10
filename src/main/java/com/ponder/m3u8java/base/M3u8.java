@@ -68,6 +68,7 @@ public class M3u8 {
         try {
             //解析m3u8
             Parser.parse(inputStream,this);
+            getKey();
         } catch (IOException e) {
             e.printStackTrace();
             Log.log("解析m3u8失败");
@@ -222,6 +223,10 @@ public class M3u8 {
             return getCacheFolder()+getSerial()+"-"+url.substring(url.lastIndexOf("/")+1);
         }
 
+        public String getAesKey(){
+            return aesKey;
+        }
+
         public int getSerial() {
             return serial;
         }
@@ -277,21 +282,12 @@ public class M3u8 {
     DownloadCallback downloadCallback = new DownloadCallback() {
         @Override
         public void onComplete(List<TS> tsList) throws IOException {
-            getKey();
             File writeFile = new File(baseDir + name);
             File parent = new File(writeFile.getParent());
             if (!parent.exists())parent.mkdirs();
             FileOutputStream fos = new FileOutputStream(writeFile);
             for (TS ts:tsList){
                 byte[] buffer = FileUtil.readBytesFromFile(ts.getTsFile());
-                if (aesKey!=null){
-                    try {
-                        buffer = AesUtil.decrypt(buffer,aesKey);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        Log.log("aes解密失败");
-                    }
-                }
                 fos.write(buffer);
             }
             fos.flush();
