@@ -15,8 +15,11 @@ public class M3u8Main {
 
     public static void main(String[] args) throws Exception {
         addExceptionHandler();
-        InputStream index = ClassLoader.getSystemResourceAsStream("test.m3u8");
-        M3u8 m3u8 = new M3u8(index, host);
+//        InputStream index = ClassLoader.getSystemResourceAsStream("test.m3u8");
+//        M3u8 m3u8 = new M3u8(index, host);
+//        M3u8 m3u8 = new M3u8("https://v8.yongjiu8.com/20180321/V8I5Tg8p/index.m3u8");
+        M3u8 m3u8 = new M3u8("http://youku.cdn-iqiyi.com/20180523/11112_b1fb9d8b/index.m3u8");
+//        M3u8 m3u8 = new M3u8("https://135zyv5.xw0371.com/2018/10/29/X05c7CG3VB91gi1M/playlist.m3u8");//会出错
         m3u8.download();
     }
 
