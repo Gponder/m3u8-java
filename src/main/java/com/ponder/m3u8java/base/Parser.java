@@ -31,7 +31,7 @@ public class Parser {
             if (line.startsWith(HeadMark.EXT_X_STREAM_INF.toString())){
                 Map<String,String> mapInfo = parseHeadToMap(line);
                 String url = reader.readLine();
-                if(!line.endsWith(".m3u8"))throw new RuntimeException("重定向视频流解析失败");
+                if(!url.endsWith(".m3u8"))throw new RuntimeException("重定向视频流解析失败");
                 m3u8.addSubM3u8(url,line,mapInfo);
             }
             if(line.startsWith(HeadMark.EXT_X_ENDLIST.toString())){

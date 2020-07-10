@@ -163,11 +163,12 @@ public class M3u8 {
      * @throws IOException
      */
     public String getKey() throws IOException {
-        Map<String, String> keys = Parser.parseHeadToMap(headers.get(Parser.HeadMark.EXT_X_KEY).toString());
+        Map<String, String> keys = Parser.parseHeadToMap(headers.get(Parser.HeadMark.EXT_X_KEY.toString()));
         if (keys==null)return null;
         if (keys.get("METHOD").equalsIgnoreCase("AES-128")){
             String keyUrl = keys.get("URI");
-            aesKey = downloader.getString(host + keyUrl);
+            if (keyUrl==null)return null;
+            aesKey = downloader.getString(Parser.assembleHost(host,path,keyUrl) + keyUrl);
         }
         return aesKey;
     }
