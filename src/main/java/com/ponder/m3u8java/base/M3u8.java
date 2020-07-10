@@ -25,7 +25,7 @@ public class M3u8 {
     private String name;
     private InputStream inputStream;
     public Map<String,String> headers = new HashMap<String, String>();
-    public List<String> subM3u8s = new ArrayList<String>();
+    public List<SubInfo> subM3u8s = new ArrayList<SubInfo>();
     private List<TS> body = new ArrayList<TS>();
     private final String baseDir = "D:/ts/";
     private final String cacheDir = baseDir+"cache/";
@@ -78,6 +78,10 @@ public class M3u8 {
         body.add(new TS(duration,url,body.size()));
     }
 
+    public void addSubM3u8(String url,String info,Map<String,String> infoMap){
+        subM3u8s.add(new SubInfo(url,info,infoMap));
+    }
+
     public boolean hasSubM3u8(){
         return subM3u8s.size()!=0;
     }
@@ -91,9 +95,23 @@ public class M3u8 {
     }
 
     public M3u8 downloadSubM3u8() throws IOException {
-        String subPath = subM3u8s.get(0);
+        SubInfo subInfo = getMaxM3u8Info(subM3u8s);
+        String subPath = subInfo.getUrl();
         String subHost = Parser.assembleHost(host,path,subPath);
         return new M3u8(subHost,subPath);
+    }
+
+    private SubInfo getMaxM3u8Info(List<SubInfo> subM3u8s) {
+        SubInfo max = subM3u8s.get(0);
+        int bandWidth=0;
+        for (SubInfo subInfo:subM3u8s){
+            int currentWidth = Integer.parseInt(subInfo.getInfoMap().get("BANDWIDTH"));
+            if (currentWidth>bandWidth){
+                bandWidth = currentWidth;
+                max=subInfo;
+            }
+        }
+        return max;
     }
 
     /**
@@ -134,7 +152,7 @@ public class M3u8 {
      * @throws IOException
      */
     public String getKey() throws IOException {
-        Map<String, String> keys = Parser.parseExtKey(this);
+        Map<String, String> keys = Parser.parseHeadToMap(headers.get(Parser.HeadMark.EXT_X_KEY).toString());
         if (keys==null)return null;
         if (keys.get("METHOD").equalsIgnoreCase("AES-128")){
             String keyUrl = keys.get("URI");
@@ -143,7 +161,41 @@ public class M3u8 {
         return aesKey;
     }
 
+    public class SubInfo{
+        private String url;
+        private String info;
+        private Map<String,String> infoMap;
 
+        public SubInfo(String url, String info, Map<String, String> infoMap) {
+            this.url = url;
+            this.info = info;
+            this.infoMap = infoMap;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getInfo() {
+            return info;
+        }
+
+        public void setInfo(String info) {
+            this.info = info;
+        }
+
+        public Map<String, String> getInfoMap() {
+            return infoMap;
+        }
+
+        public void setInfoMap(Map<String, String> infoMap) {
+            this.infoMap = infoMap;
+        }
+    }
 
     public class TS{
         private int serial;
