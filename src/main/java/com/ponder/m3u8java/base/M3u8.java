@@ -126,6 +126,14 @@ public class M3u8 {
             TS tsObj = body.get(i);
             String ts = tsObj.getUrl();
             byte[] bodyBytes = downloader.getBytes(host + ts);
+            if (aesKey!=null){
+                try {
+                    bodyBytes = AesUtil.decrypt(bodyBytes,aesKey);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                    Log.log("aes解密失败");
+                }
+            }
             File tsFile = new File(tsObj.getCacheFile());
             FileUtil.writeBodyBytesToFile(bodyBytes,tsFile);
             tsObj.setTsFile(tsFile.toString());
