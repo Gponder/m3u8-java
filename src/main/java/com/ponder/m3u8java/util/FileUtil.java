@@ -1,6 +1,7 @@
 package com.ponder.m3u8java.util;
 
 import java.io.*;
+import java.lang.reflect.Field;
 
 public class FileUtil {
 
@@ -31,6 +32,22 @@ public class FileUtil {
         fis.read(buffer);
         fis.close();
         return buffer;
+    }
+
+    /**
+     * 合并文件工具
+     * @param filePath
+     * @throws IOException
+     */
+    public static void mergeFile(String filePath) throws IOException {
+        File file=new File(filePath);
+        String[] files = file.list();
+        FileOutputStream fos = new FileOutputStream(filePath + "/merged");
+        for (String ts:files){
+            fos.write(readBytesFromFile(ts));
+        }
+        fos.flush();
+        fos.close();
     }
 
     /**
