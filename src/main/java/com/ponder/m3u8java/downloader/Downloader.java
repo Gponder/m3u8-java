@@ -34,6 +34,8 @@ public abstract class Downloader{
         private M3u8.TS ts;
         private TsDownloadCallback callback;
 
+        private byte[] bodyBytes;
+
         public TSRunnable(M3u8.TS ts, TsDownloadCallback callback) {
             this.ts = ts;
             this.callback = callback;
@@ -41,11 +43,9 @@ public abstract class Downloader{
 
         @Override
         public void run() {
-            String tsUrl = ts.getUrl();
-            byte[] bodyBytes = new byte[0];
             boolean isGet = false;
             while (!isGet){
-                isGet = getBytesForRetry(tsUrl,bodyBytes);
+                isGet = getBytesForRetry();
             }
             try {
                 if (ts.getAesKey()!=null) bodyBytes = AesUtil.decrypt(bodyBytes,ts.getAesKey());
@@ -60,9 +60,9 @@ public abstract class Downloader{
             }
         }
 
-        private boolean getBytesForRetry(String tsUrl, byte[] bodyBytes) {
+        private boolean getBytesForRetry() {
             try {
-                bodyBytes = getBytes(ts.getHost() + tsUrl);
+                bodyBytes = getBytes(ts.getHost() + ts.getUrl());
             } catch (IOException e) {
                 Log.log(ts.getSerial() + "SocketException; I will retry for it" + e.getCause());
                 return false;
