@@ -63,14 +63,16 @@ public class FileUtil {
         tsOutputStream.close();
     }
 
-    private void writeStreamToFile(InputStream is, File tsFile) throws IOException {
-        FileOutputStream tsOutputStream = new FileOutputStream(tsFile);
+    public static String writeStreamToFile(InputStream is, File file) throws IOException {
+        FileOutputStream fos = new FileOutputStream(file);
         byte[] buffer = new byte[1024];
-        int l;
-        while ((l = is.available()) != 0){
-            is.read(buffer);
-            tsOutputStream.write(buffer,0,l);
+        int len;
+        while ((len = is.read(buffer)) != -1){
+            fos.write(buffer,0,len);
         }
+        fos.flush();
+        fos.close();
+        return file.getPath();
     }
 
     /**

@@ -67,7 +67,9 @@ public class M3u8 {
     private void init() {
         try {
             //解析m3u8
-            Parser.parse(inputStream,this);
+            String m3u8File = cacheDir + name + ".m3u8";
+            FileUtil.writeStreamToFile(inputStream,new File(m3u8File));
+            Parser.parse(new FileInputStream(m3u8File),this);
             getKey();
         } catch (IOException e) {
             e.printStackTrace();
