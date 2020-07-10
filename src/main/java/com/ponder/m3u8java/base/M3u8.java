@@ -91,9 +91,8 @@ public class M3u8 {
     }
 
     public M3u8 downloadSubM3u8() throws IOException {
-        String url = subM3u8s.get(0);
-        String subHost = host;
-        String subPath = url;
+        String subPath = subM3u8s.get(0);
+        String subHost = Parser.assembleHost(host,path,subPath);
         return new M3u8(subHost,subPath);
     }
 
@@ -158,7 +157,7 @@ public class M3u8 {
         }
 
         public String getHost(){
-            return host;
+            return Parser.assembleHost(host,path,url);
         }
 
         public String getCacheFolder(){

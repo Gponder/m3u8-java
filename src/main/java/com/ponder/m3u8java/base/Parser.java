@@ -63,6 +63,22 @@ public class Parser {
         return extKey;
     }
 
+    /**
+     * 解析新的 host
+     * @param host
+     * @param path
+     * @param subPath
+     * @return
+     */
+    public static String assembleHost(String host, String path, String subPath){
+        if (subPath.startsWith("/")){
+            return host;
+        }else{
+            String url = host+path;
+            return url.substring(0,url.lastIndexOf("/")+1);
+        }
+    }
+
     //headers
     enum HeadMark{
         EXT_X_STREAM_INF("#EXT-X-STREAM-INF:"),             //视频流信息     #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1665000,RESOLUTION=960x540
