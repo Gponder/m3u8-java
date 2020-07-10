@@ -8,6 +8,7 @@ import com.ponder.m3u8java.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,17 +41,13 @@ public abstract class Downloader{
 
         @Override
         public void run() {
+            String tsUrl = ts.getUrl();
+            byte[] bodyBytes = new byte[0];
+            boolean isGet = false;
+            while (!isGet){
+                isGet = getBytesForRetry(tsUrl,bodyBytes);
+            }
             try {
-                String tsUrl = ts.getUrl();
-                byte[] bodyBytes = getBytes(ts.getHost() + tsUrl);
-                if (ts.getAesKey()!=null){
-                    try {
-                        bodyBytes = AesUtil.decrypt(bodyBytes,ts.getAesKey());
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        Log.log("aes解密失败");
-                    }
-                }
                 File tsFile = new File(ts.getCacheFile());
                 FileUtil.writeBodyBytesToFile(bodyBytes,tsFile);
                 ts.setTsFile(tsFile.toString());
@@ -60,6 +57,22 @@ public abstract class Downloader{
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        private boolean getBytesForRetry(String tsUrl, byte[] bodyBytes) {
+            try {
+                bodyBytes = getBytes(ts.getHost() + tsUrl);
+                if (ts.getAesKey()!=null){
+                    bodyBytes = AesUtil.decrypt(bodyBytes,ts.getAesKey());
+                }
+            }catch (SocketTimeoutException timeoutException){
+                Log.log("java.net.SocketTimeoutException: Read timed out; I will retry for it");
+                return false;
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.log("aes解密失败");
+            }
+            return true;
         }
     }
 
