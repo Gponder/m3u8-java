@@ -48,13 +48,14 @@ public abstract class Downloader{
                 isGet = getBytesForRetry(tsUrl,bodyBytes);
             }
             try {
+                if (ts.getAesKey()!=null) bodyBytes = AesUtil.decrypt(bodyBytes,ts.getAesKey());
                 File tsFile = new File(ts.getCacheFile());
                 FileUtil.writeBodyBytesToFile(bodyBytes,tsFile);
                 ts.setTsFile(tsFile.toString());
                 ts.setDownloaded(true);
                 Log.log(Thread.currentThread().getId() + "下载完成" + ts.getTsFile());
                 callback.onTsDownloaded(ts);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -62,15 +63,9 @@ public abstract class Downloader{
         private boolean getBytesForRetry(String tsUrl, byte[] bodyBytes) {
             try {
                 bodyBytes = getBytes(ts.getHost() + tsUrl);
-                if (ts.getAesKey()!=null){
-                    bodyBytes = AesUtil.decrypt(bodyBytes,ts.getAesKey());
-                }
-            }catch (SocketTimeoutException timeoutException){
-                Log.log("java.net.SocketTimeoutException: Read timed out; I will retry for it");
+            } catch (IOException e) {
+                Log.log("SocketException; I will retry for it");
                 return false;
-            }catch (Exception e){
-                e.printStackTrace();
-                Log.log("aes解密失败");
             }
             return true;
         }
