@@ -64,6 +64,10 @@ public class M3u8 {
         init();
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     private void init() {
         try {
             //解析m3u8
