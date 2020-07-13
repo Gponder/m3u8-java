@@ -1,10 +1,8 @@
 package com.ponder.m3u8java.gui;
 
-import com.ponder.m3u8java.M3u8Main;
 import com.ponder.m3u8java.base.M3u8;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
 
 /**
