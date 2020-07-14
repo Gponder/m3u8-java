@@ -1,4 +1,6 @@
-package com.ponder.m3u8java.gui;
+package com.ponder.m3u8java.gui.pop;
+
+import com.ponder.m3u8java.gui.pop.Pop;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,6 +29,8 @@ public class SettingPop extends Pop {
         jPanel.add(path);
         jPanel.add(jButton);
         jButton.addActionListener(e->{
+            setVisible(false);
+            isShowing=false;
             map.put(key,path.getText());
             popCallback.callback(event,map);
         });

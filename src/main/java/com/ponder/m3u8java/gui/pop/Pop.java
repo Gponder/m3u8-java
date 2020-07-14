@@ -1,4 +1,4 @@
-package com.ponder.m3u8java.gui;
+package com.ponder.m3u8java.gui.pop;
 
 import javax.swing.*;
 import java.awt.event.WindowEvent;
@@ -23,6 +23,7 @@ public abstract class Pop extends JDialog implements WindowListener {
         setContentPane(jPanel);
         setBounds(250, 250, 300, 150);
         addWindowListener(this);
+        addCustomerView();
     }
 
     public void showing(){

@@ -2,6 +2,8 @@ package com.ponder.m3u8java.gui;
 
 import com.ponder.m3u8java.base.M3u8;
 import com.ponder.m3u8java.config.Config;
+import com.ponder.m3u8java.gui.pop.Pop;
+import com.ponder.m3u8java.gui.pop.SettingPop;
 import com.ponder.m3u8java.util.Log;
 import org.apache.http.util.TextUtils;
 
@@ -118,7 +120,6 @@ public class GuiMain {
 
     private void showSettingPop() {
         SettingPop setting = new SettingPop();
-        setting.addCustomerView();
         setting.setPopCallback(new Pop.PopCallback() {
             @Override
             public void callback(String event, Map<String, Object> data) {
