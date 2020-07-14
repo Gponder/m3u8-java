@@ -1,6 +1,7 @@
 package com.ponder.m3u8java.gui;
 
 import com.ponder.m3u8java.base.M3u8;
+import com.ponder.m3u8java.config.Config;
 import com.ponder.m3u8java.util.Log;
 import org.apache.http.util.TextUtils;
 
@@ -8,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -29,6 +31,7 @@ public class GuiMain {
     //主窗口
     private void mainFrame() {
         //主题 JFrame.setDefaultLookAndFeelDecorated(true);
+        Config.init();
         JFrame jFrame = new JFrame("m3u8");
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setBounds(200,200,400,300);
@@ -99,12 +102,30 @@ public class GuiMain {
 
     private void addMenu(JFrame jFrame){
         Menu menu = new Menu(jFrame);
+
         JMenu task = menu.addMenu("任务");
         JMenuItem newTask = menu.addMenuItem(task, "新建");
-
         newTask.addActionListener((event)->{
             showTaskPop();
         });
+
+        JMenu setting = menu.addMenu("设置");
+        JMenuItem storePath = menu.addMenuItem(setting,"存储路径");
+        storePath.addActionListener(e -> {
+            showSettingPop();
+        });
+    }
+
+    private void showSettingPop() {
+        SettingPop setting = new SettingPop();
+        setting.addCustomerView();
+        setting.setPopCallback(new Pop.PopCallback() {
+            @Override
+            public void callback(String event, Map<String, Object> data) {
+                Config.setBaseDir(data.get(SettingPop.key).toString());
+            }
+        });
+        setting.showing();
     }
 
     private void showTaskPop() {

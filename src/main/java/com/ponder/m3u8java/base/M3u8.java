@@ -27,7 +27,7 @@ public class M3u8 {
     public Map<String,String> headers = new HashMap<String, String>();
     public List<SubInfo> subM3u8s = new ArrayList<SubInfo>();
     private List<TS> body = new ArrayList<TS>();
-    private final String baseDir = "E:/ts/";
+    public static String baseDir = "E:/ts/";
     private final String cacheDir = baseDir+"cache/";
     private String aesKey;
     private Downloader downloader = DownloadFactory.getDownloader(DownloadFactory.Type.URL_CONNECTION);
