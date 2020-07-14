@@ -7,7 +7,6 @@ import com.ponder.m3u8java.gui.pop.Pop;
 import com.ponder.m3u8java.gui.pop.SettingPop;
 import com.ponder.m3u8java.gui.pop.ThreadPop;
 import com.ponder.m3u8java.util.Log;
-import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.util.TextUtils;
 
 import javax.swing.*;
@@ -26,6 +25,7 @@ public class GuiMain {
 
     private final Vector<M3u8View> m3u8Vector = new Vector<>();
     private JList<M3u8View> jList;
+    private boolean startAll = false;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(()->{
@@ -75,7 +75,9 @@ public class GuiMain {
 
                         @Override
                         public void complete(String path) {
-                            download(index+1);
+                            if (startAll){
+                                startDownLoad(index+1);
+                            }
                         }
                     });
                     jPanel.add(jProgressBar);
@@ -87,15 +89,20 @@ public class GuiMain {
         jList.addMouseListener(new CustomerMouseListener(new CustomerMouseListener.DoubleClickListener() {
             @Override
             public void onDoubleClick(MouseEvent event) {
-                int index = jList.locationToIndex(event.getPoint());
-                download(index);
+                if (!startAll){
+                    int index = jList.locationToIndex(event.getPoint());
+                    startDownLoad(index);
+                }
             }
         }));
         jFrame.add(jList, BorderLayout.CENTER);
     }
 
-    private void download(int index) {
-        if (index>=m3u8Vector.size())return;
+    private void startDownLoad(int index) {
+        if (index>=m3u8Vector.size()){
+            startAll=false;
+            return;
+        }
         try {
             m3u8Vector.get(index).getM3u8().download();
         }catch (IOException e){
@@ -119,10 +126,17 @@ public class GuiMain {
         storePath.addActionListener(e -> {
             showSettingPop();
         });
+
         JMenu thread = menu.addMenu("线程");
         JMenuItem count = menu.addMenuItem(thread,"线程数");
         count.addActionListener(e -> {
             showThreadPop();
+        });
+
+        JMenu start = menu.addMenu("开始全部");
+        start.addActionListener(e -> {
+            startAll = true;
+            startDownLoad(0);
         });
     }
 
@@ -155,12 +169,12 @@ public class GuiMain {
             if (TextUtils.isEmpty(url)){
                 return;
             }
-            downLoad(url,name);
+            addDownLoad(url,name);
         });
         pop.showing();
     }
 
-    private void downLoad(String url, String name){
+    private void addDownLoad(String url, String name){
         try {
             M3u8 m3u8 = new M3u8(url);
             if (!TextUtils.isEmpty(name)){
