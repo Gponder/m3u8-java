@@ -1,6 +1,7 @@
 package com.ponder.m3u8java.gui;
 
 import com.ponder.m3u8java.base.M3u8;
+import org.apache.http.util.TextUtils;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class GuiMain {
     private void showTaskPop() {
         PopWindow pop = new PopWindow();
         pop.addTaskView((url, name)->{
-            if (url==null){
+            if (TextUtils.isEmpty(url)){
                 return;
             }
             downLoad(url,name);
@@ -52,7 +53,7 @@ public class GuiMain {
     private void downLoad(String url, String name){
         try {
             M3u8 m3u8 = new M3u8(url);
-            if (name!=null){
+            if (TextUtils.isEmpty(name)){
                 m3u8.setName(name);
             }
             m3u8.download();
