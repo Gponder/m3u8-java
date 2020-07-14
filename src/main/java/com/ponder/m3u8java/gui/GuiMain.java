@@ -133,8 +133,9 @@ public class GuiMain {
             showThreadPop();
         });
 
-        JMenu start = menu.addMenu("开始全部");
-        start.addActionListener(e -> {
+        JMenu start = menu.addMenu("开始");
+        JMenuItem startAllItem = menu.addMenuItem(start,"开始全部(双击列表可以开始单个)");
+        startAllItem.addActionListener(e -> {
             startAll = true;
             startDownLoad(0);
         });
