@@ -6,7 +6,7 @@ import com.ponder.m3u8java.downloader.urlconnection.UrlDownloader;
 
 public class DownloadFactory {
 
-    private static int poolSize = 4;
+    private static int poolSize = 8;
     private static Downloader downloader;
 
     public static synchronized Downloader getDownloader(Type type){
