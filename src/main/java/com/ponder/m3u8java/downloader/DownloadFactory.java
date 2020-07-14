@@ -22,6 +22,10 @@ public class DownloadFactory {
         if (downloader!=null) downloader.getExecutorService().shutdownNow();
     }
 
+    public static void setPoolSize(int poolSize) {
+        DownloadFactory.poolSize = poolSize;
+    }
+
     public enum Type{
         OK_HTTP(1),HTTP_CLIENT(2),URL_CONNECTION(3);
         private final int type;

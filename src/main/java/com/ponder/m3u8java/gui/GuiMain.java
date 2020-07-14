@@ -2,9 +2,12 @@ package com.ponder.m3u8java.gui;
 
 import com.ponder.m3u8java.base.M3u8;
 import com.ponder.m3u8java.config.Config;
+import com.ponder.m3u8java.downloader.DownloadFactory;
 import com.ponder.m3u8java.gui.pop.Pop;
 import com.ponder.m3u8java.gui.pop.SettingPop;
+import com.ponder.m3u8java.gui.pop.ThreadPop;
 import com.ponder.m3u8java.util.Log;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.util.TextUtils;
 
 import javax.swing.*;
@@ -116,6 +119,23 @@ public class GuiMain {
         storePath.addActionListener(e -> {
             showSettingPop();
         });
+        JMenu thread = menu.addMenu("线程");
+        JMenuItem count = menu.addMenuItem(thread,"线程数");
+        count.addActionListener(e -> {
+            showThreadPop();
+        });
+    }
+
+    private void showThreadPop() {
+        ThreadPop threadPop = new ThreadPop();
+        threadPop.setPopCallback(((event, data) -> {
+            Object num = data.get(Pop.DEFAULT_KEY);
+            for (char c:num.toString().toCharArray()){
+                if (!Character.isDigit(c))return;
+            }
+            DownloadFactory.setPoolSize(Integer.parseInt(num.toString()));
+        }));
+        threadPop.setVisible(true);
     }
 
     private void showSettingPop() {
@@ -123,7 +143,7 @@ public class GuiMain {
         setting.setPopCallback(new Pop.PopCallback() {
             @Override
             public void callback(String event, Map<String, Object> data) {
-                Config.setBaseDir(data.get(SettingPop.key).toString());
+                Config.setBaseDir(data.get(Pop.DEFAULT_KEY).toString());
             }
         });
         setting.showing();

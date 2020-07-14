@@ -18,6 +18,9 @@ public abstract class Pop extends JDialog implements WindowListener {
     protected Map<String,Object> map = new HashMap<>();
     public static boolean isShowing=false;
 
+    public static final String DEFAULT_EVENT = "ENTER";
+    public static final String DEFAULT_KEY = "KEY";
+
     public Pop() {
         this.jPanel = new JPanel();
         setContentPane(jPanel);

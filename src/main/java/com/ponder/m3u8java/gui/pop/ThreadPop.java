@@ -1,16 +1,14 @@
 package com.ponder.m3u8java.gui.pop;
 
-import com.ponder.m3u8java.gui.pop.Pop;
-
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * @auth ponder
  * @Email gponder.g@gmail.com
- * @create 2020/7/14 16:12
+ * @create 2020/7/14 16:59
  */
-public class SettingPop extends Pop {
+public class ThreadPop extends Pop{
 
     private JLabel jLabel;
     private JTextField path;
@@ -18,7 +16,7 @@ public class SettingPop extends Pop {
 
     @Override
     void addCustomerView() {
-        jLabel = new JLabel("保存路径");
+        jLabel = new JLabel("线程数量");
         path = new JTextField();
         path.setPreferredSize(new Dimension(200,30));
         jButton = new JButton("确定");
@@ -32,6 +30,4 @@ public class SettingPop extends Pop {
             popCallback.callback(DEFAULT_EVENT,map);
         });
     }
-
-
 }
