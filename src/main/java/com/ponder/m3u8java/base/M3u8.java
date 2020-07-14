@@ -31,6 +31,7 @@ public class M3u8 {
     private final String cacheDir = baseDir+"cache/";
     private String aesKey;
     private Downloader downloader = DownloadFactory.getDownloader(DownloadFactory.Type.URL_CONNECTION);
+    private DownloadStateCallback downloadStateCallback;
 
     public M3u8(String url) throws IOException {
         String h = new URL(url).getHost();
@@ -66,6 +67,14 @@ public class M3u8 {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setDownloadStateCallback(DownloadStateCallback downloadStateCallback) {
+        this.downloadStateCallback = downloadStateCallback;
     }
 
     private void init() {
@@ -105,6 +114,7 @@ public class M3u8 {
         SubInfo subInfo = getMaxM3u8Info(subM3u8s);
         String subPath = subInfo.getUrl();
         String subHost = Parser.assembleHost(host,path,subPath);
+        //不创建新的 创建新m3u8会造成一些变量以及回调无法使用
         return new M3u8(subHost,subPath);
     }
 
@@ -287,9 +297,15 @@ public class M3u8 {
         @Override
         public void onTsDownloaded(TS ts) throws IOException {
             boolean isAllDownload=true;
+            int current=0;
             for (TS t:body){
-                if (!t.isDownloaded())isAllDownload=false;
+                if (!t.isDownloaded()){
+                    isAllDownload=false;
+                }else {
+                    current++;
+                }
             }
+            if (downloadStateCallback!=null)downloadStateCallback.progress(body.size(),current);
             if (isAllDownload) downloadCallback.onComplete(body);
         }
     };
@@ -308,11 +324,17 @@ public class M3u8 {
             fos.flush();
             fos.close();
             Log.log("合并完成");
+            if (downloadStateCallback!=null) downloadStateCallback.complete(writeFile.getPath());
         }
     };
 
     interface DownloadCallback {
         void onComplete(List<TS> tsList) throws IOException;
+    }
+
+    public interface DownloadStateCallback{
+        void progress(int max,int current);
+        void complete(String path);
     }
 
 }
