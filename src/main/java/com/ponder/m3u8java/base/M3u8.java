@@ -115,7 +115,12 @@ public class M3u8 {
         String subPath = subInfo.getUrl();
         String subHost = Parser.assembleHost(host,path,subPath);
         //不创建新的 创建新m3u8会造成一些变量以及回调无法使用
-        return new M3u8(subHost,subPath);
+        this.path = subPath;
+        this.host = subHost;
+        this.inputStream = downloader.getStream(host+path);
+        this.subM3u8s = new ArrayList<>();
+        init();
+        return this;
     }
 
     private SubInfo getMaxM3u8Info(List<SubInfo> subM3u8s) {
