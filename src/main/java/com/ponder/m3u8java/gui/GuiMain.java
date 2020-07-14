@@ -39,11 +39,6 @@ public class GuiMain {
 
     private void addList(JFrame jFrame){
         jList = new JList<>();
-        try {
-            m3u8Vector.add(new M3u8View(new M3u8("https://v8.yongjiu8.com/20180321/V8I5Tg8p/index.m3u8"),null));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         jList.setListData(m3u8Vector);
         jList.setCellRenderer(new ListCellRenderer<M3u8View>() {
             /**
