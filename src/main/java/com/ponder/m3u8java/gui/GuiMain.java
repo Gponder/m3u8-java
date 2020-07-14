@@ -115,7 +115,7 @@ public class GuiMain {
             }
             downLoad(url,name);
         });
-        pop.setVisible(true);
+        pop.showing();
     }
 
     private void downLoad(String url, String name){
