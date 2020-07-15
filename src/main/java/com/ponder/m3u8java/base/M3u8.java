@@ -32,6 +32,7 @@ public class M3u8 {
     private String aesKey;
     private Downloader downloader = DownloadFactory.getDownloader(DownloadFactory.Type.URL_CONNECTION);
     private DownloadStateCallback downloadStateCallback;
+    private DownloadState downloadState = DownloadState.Init;
 
     public M3u8(String url) throws IOException {
         String h = new URL(url).getHost();
@@ -73,6 +74,10 @@ public class M3u8 {
         return name;
     }
 
+    public DownloadState getDownloadState() {
+        return downloadState;
+    }
+
     public void setDownloadStateCallback(DownloadStateCallback downloadStateCallback) {
         this.downloadStateCallback = downloadStateCallback;
     }
@@ -103,6 +108,7 @@ public class M3u8 {
     }
 
     public void download() throws IOException {
+        downloadState=DownloadState.Downloading;
         if (hasSubM3u8()){
             downloadSubM3u8().download();
         }else{
@@ -329,9 +335,14 @@ public class M3u8 {
             fos.flush();
             fos.close();
             Log.log("合并完成");
+            downloadState = DownloadState.Complete;
             if (downloadStateCallback!=null) downloadStateCallback.complete(writeFile.getPath());
         }
     };
+
+    public enum DownloadState{
+        Init,Downloading,Complete
+    }
 
     interface DownloadCallback {
         void onComplete(List<TS> tsList) throws IOException;

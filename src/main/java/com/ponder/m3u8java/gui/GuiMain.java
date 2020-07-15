@@ -104,7 +104,9 @@ public class GuiMain {
             return;
         }
         try {
-            m3u8Vector.get(index).getM3u8().download();
+            M3u8 m3u8 = m3u8Vector.get(index).getM3u8();
+            if (m3u8.getDownloadState()== M3u8.DownloadState.Init)
+            m3u8.download();
         }catch (IOException e){
             m3u8Vector.get(index).getView().setBackground(Color.RED);
             e.printStackTrace();
