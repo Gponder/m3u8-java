@@ -71,6 +71,7 @@ public class GuiMain {
                             jProgressBar.setMinimum(max);
                             jProgressBar.setMinimum(0);
                             jProgressBar.setValue(current);
+                            Log.log(current+"/"+max);
                         }
 
                         @Override
