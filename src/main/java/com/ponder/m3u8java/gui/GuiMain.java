@@ -64,10 +64,12 @@ public class GuiMain {
                 if (value.getView()==null){
                     JPanel jPanel = new JPanel();
                     jPanel.add(new JLabel(value.getM3u8().getName()));
+                    JLabel stateLabel = new JLabel("待下载");
                     JProgressBar jProgressBar = new JProgressBar();
                     value.getM3u8().setDownloadStateCallback(new M3u8.DownloadStateCallback() {
                         @Override
                         public void progress(int max, int current) {
+                            stateLabel.setText("下载中");
                             jProgressBar.setMinimum(max);
                             jProgressBar.setMinimum(0);
                             jProgressBar.setValue(current);
@@ -76,12 +78,14 @@ public class GuiMain {
 
                         @Override
                         public void complete(String path) {
+                            stateLabel.setText("完成");
                             if (startAll){
                                 startDownLoad(index+1);
                             }
                         }
                     });
                     jPanel.add(jProgressBar);
+                    jPanel.add(stateLabel);
                     value.setView(jPanel);
                 }
                 return value.getView();

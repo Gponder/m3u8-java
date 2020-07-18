@@ -104,11 +104,11 @@ public class PopWindow extends JDialog implements WindowListener{
 
         public void addCallback(AddCallback addCallback) {
             jButton.addActionListener((event) -> {
+                setVisible(false);
+                isShowing=false;
                 String url = urlField.getText().trim();
                 String name = fileField.getText().trim();
                 addCallback.added(url, name);
-                setVisible(false);
-                isShowing=false;
             });
         }
     }
