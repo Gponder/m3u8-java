@@ -94,23 +94,25 @@ public class GuiMain {
         jList.addMouseListener(new CustomerMouseListener(new CustomerMouseListener.DoubleClickListener() {
             @Override
             public void onDoubleClick(MouseEvent event) {
-                if (!startAll){
-                    int index = jList.locationToIndex(event.getPoint());
-                    startDownLoad(index);
-                }
+                int index = jList.locationToIndex(event.getPoint());
+                startDownLoad(index);
             }
         }));
         jFrame.add(jList, BorderLayout.CENTER);
     }
 
     private void startDownLoad(int index) {
-        if (index>=m3u8Vector.size()){
-            startAll=false;
-            return;
-        }
         try {
-            M3u8 m3u8 = m3u8Vector.get(index).getM3u8();
-            if (m3u8.getDownloadState()== M3u8.DownloadState.Init)
+            M3u8 m3u8;
+            do {
+                if (index>=m3u8Vector.size()){
+                    startAll=false;
+                    return;
+                }
+                m3u8 = m3u8Vector.get(index).getM3u8();
+                index++;
+            }
+            while (m3u8.getDownloadState()!=M3u8.DownloadState.Init);
             m3u8.download();
         }catch (IOException e){
             m3u8Vector.get(index).getView().setBackground(Color.RED);
