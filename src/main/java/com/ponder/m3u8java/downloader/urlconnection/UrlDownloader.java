@@ -1,6 +1,7 @@
 package com.ponder.m3u8java.downloader.urlconnection;
 
 import com.ponder.m3u8java.downloader.Downloader;
+import com.ponder.m3u8java.util.AddCert;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,6 +23,7 @@ public class UrlDownloader extends Downloader {
 
     private URLConnection getUrlConnection(String url) throws IOException {
         URLConnection urlConnection = new URL(url).openConnection();
+        AddCert.addCertNoException(urlConnection);
         setTimeOut(urlConnection);
         urlConnection.connect();
         return urlConnection;
