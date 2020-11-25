@@ -16,10 +16,15 @@ public class UrlDownloader extends Downloader {
 
     @Override
     public InputStream getStream(String url) throws IOException {
+        URLConnection urlConnection = getUrlConnection(url);
+        return urlConnection.getInputStream();
+    }
+
+    private URLConnection getUrlConnection(String url) throws IOException {
         URLConnection urlConnection = new URL(url).openConnection();
         setTimeOut(urlConnection);
         urlConnection.connect();
-        return urlConnection.getInputStream();
+        return urlConnection;
     }
 
     private void setTimeOut(URLConnection urlConnection) {
@@ -29,9 +34,7 @@ public class UrlDownloader extends Downloader {
 
     @Override
     public byte[] getBytes(String url) throws IOException {
-        URLConnection urlConnection = new URL(url).openConnection();
-        setTimeOut(urlConnection);
-        urlConnection.connect();
+        URLConnection urlConnection = getUrlConnection(url);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         InputStream is = urlConnection.getInputStream();
         byte[] buffer = new byte[1024];
