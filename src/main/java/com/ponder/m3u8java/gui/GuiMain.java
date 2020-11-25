@@ -94,28 +94,26 @@ public class GuiMain {
         jList.addMouseListener(new CustomerMouseListener(new CustomerMouseListener.DoubleClickListener() {
             @Override
             public void onDoubleClick(MouseEvent event) {
-                if (!startAll){
-                    int index = jList.locationToIndex(event.getPoint());
-                    startDownLoad(index);
-                }
+                int index = jList.locationToIndex(event.getPoint());
+                startDownLoad(index);
             }
         }));
         jFrame.add(jList, BorderLayout.CENTER);
     }
 
     private void startDownLoad(int index) {
-        if (index>=m3u8Vector.size()){
-            startAll=false;
-            return;
-        }
         try {
-            M3u8 m3u8 = m3u8Vector.get(index).getM3u8();
-            if (m3u8.getDownloadState()== M3u8.DownloadState.Init){
-                m3u8.download();
-            }else if (m3u8.getDownloadState()== M3u8.DownloadState.Complete){
-                this.startDownLoad(++index);
-            }else{
+            M3u8 m3u8;
+            do {
+                if (index>=m3u8Vector.size()){
+                    startAll=false;
+                    return;
+                }
+                m3u8 = m3u8Vector.get(index).getM3u8();
+                index++;
             }
+            while (m3u8.getDownloadState()!=M3u8.DownloadState.Init);
+            m3u8.download();
         }catch (IOException e){
             m3u8Vector.get(index).getView().setBackground(Color.RED);
             e.printStackTrace();
@@ -145,7 +143,7 @@ public class GuiMain {
         });
 
         JMenu start = menu.addMenu("开始");
-        JMenuItem startAllItem = menu.addMenuItem(start,"连续下载(双击列表可以开始单个)");
+        JMenuItem startAllItem = menu.addMenuItem(start,"开始全部(双击列表可以开始单个)");
         startAllItem.addActionListener(e -> {
             startAll = true;
             startDownLoad(0);
