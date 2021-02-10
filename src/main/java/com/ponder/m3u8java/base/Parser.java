@@ -37,6 +37,10 @@ public class Parser {
             if(line.startsWith(HeadMark.EXT_X_ENDLIST.toString())){
                 break;
             }
+            //插播内容暂不下载 期待后续... 加密key可能在第一个m3u8中也可能在子m3u8中 功能加强请期待后续
+            if(line.startsWith(HeadMark.EXT_X_DISCONTINUITY.toString())){
+                break;
+            }
             counter++;
         }
     }
@@ -92,6 +96,7 @@ public class Parser {
         EXT_X_KEY("#EXT-X-KEY:"),                           //解码NONE 或者 AES-128     #EXT-X-KEY:METHOD=AES-128,URI="/key.key"
         EXT_INF("#EXTINF:"),                                //视频分片标志
         EXT_X_ENDLIST("#EXT-X-ENDLIST"),                    //结束 #EXT-X-ENDLIST
+        EXT_X_DISCONTINUITY("#EXT-X-DISCONTINUITY"),        //不连续重新初始化播放器  通常用于插播广告 后边会跟 #EXT-X-KEY:METHOD=NONE等用于更新播放参数
         ;
 
         private String mark;
