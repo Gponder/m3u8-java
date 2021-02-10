@@ -62,7 +62,13 @@ public abstract class Downloader{
 
         private boolean getBytesForRetry() {
             try {
-                bodyBytes = getBytes(ts.getHost() + ts.getUrl());
+                String url;
+                if (ts.getUrl().startsWith("http")){
+                    url = ts.getUrl();
+                }else{
+                    url = ts.getHost()+ts.getUrl();
+                }
+                bodyBytes = getBytes(url);
             } catch (IOException e) {
                 Log.log(ts.getSerial() + "SocketException; I will retry for it" + e.getCause());
                 return false;

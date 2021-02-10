@@ -152,7 +152,10 @@ public class M3u8 {
         for (int i=0;i<body.size();i++){
             TS tsObj = body.get(i);
             String ts = tsObj.getUrl();
-            byte[] bodyBytes = downloader.getBytes(host + ts);
+            if(!ts.startsWith("http")){
+                ts = host + ts;
+            }
+            byte[] bodyBytes = downloader.getBytes(ts);
             if (aesKey!=null){
                 try {
                     bodyBytes = AesUtil.decrypt(bodyBytes,aesKey);
