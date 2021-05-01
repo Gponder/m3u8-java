@@ -92,6 +92,7 @@ public class PopWindow extends JDialog implements WindowListener{
             fileField = new JTextField();//"请输入保存文件名"
             fileField.setPreferredSize(new Dimension(200, 30));
             jButton = new JButton("添加");
+            setAlwaysOnTop(true);
         }
 
         public void addToPanel(JPanel panel) {
