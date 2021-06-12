@@ -99,6 +99,18 @@ public class M3u8 {
         body.add(new TS(duration,url,body.size()));
     }
 
+    /**
+     * 简单的去除 不需要的视频分片
+     */
+    public void reduceTs(){
+        for (int i=body.size()-1;i>=0;i--){
+            TS ts = body.get(i);
+            if (ts.getUrl().startsWith("http")){
+                body.remove(ts);
+            }
+        }
+    }
+
     public void addSubM3u8(String url,String info,Map<String,String> infoMap){
         subM3u8s.add(new SubInfo(url,info,infoMap));
     }

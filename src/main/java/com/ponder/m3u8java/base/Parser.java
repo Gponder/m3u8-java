@@ -39,16 +39,25 @@ public class Parser {
             }
             //插播内容暂不下载 期待后续... 加密key可能在第一个m3u8中也可能在子m3u8中 功能加强请期待后续
             if(line.startsWith(HeadMark.EXT_X_DISCONTINUITY.toString())){
-                break;
+                //继续添加然后去除http开头的不需要的视频分片
+                //break;
             }
             counter++;
         }
+        m3u8.reduceTs();
     }
 
     private static void parseHead(Map<String, String> headers, String line) {
         for (HeadMark mark:HeadMark.values()){
             if (line.contains(mark.toString())){
-                headers.put(mark.toString(),line);
+                //补丁处理
+                if (line.startsWith(HeadMark.EXT_X_KEY.toString())){
+                    if (!parseHeadToMap(line).get("METHOD").equalsIgnoreCase("NONE")){
+                        headers.put(mark.toString(),line);
+                    }
+                }else{
+                    headers.put(mark.toString(),line);
+                }
             }
         }
     }
